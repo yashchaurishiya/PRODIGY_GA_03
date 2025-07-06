@@ -1,0 +1,63 @@
+import random
+
+# Sample text to train the Markov Chain (replace with your own text)
+training_text = """
+The sun sets slowly behind the mountain.
+A gentle breeze rustles the leaves.
+In the city, lights begin to twinkle.
+The world feels calm and serene.
+"""
+
+# Function to build the Markov Chain
+def build_markov_chain(text, order=2):
+    # Split text into words
+    words = text.split()
+    markov_chain = {}
+    
+    # Create n-grams and their next word probabilities
+    for i in range(len(words) - order):
+        current_state = tuple(words[i:i + order])  # Current sequence of words
+        next_word = words[i + order]  # Next word
+        
+        if current_state in markov_chain:
+            markov_chain[current_state].append(next_word)
+        else:
+            markov_chain[current_state] = [next_word]
+    
+    return markov_chain
+
+# Function to generate text
+def generate_text(markov_chain, length=10, start_words=None):
+    if not markov_chain:
+        return "No data to generate text."
+    
+    # Start with a random state or provided start words
+    if start_words:
+        state = tuple(start_words.split()[-2:])  # Last 2 words as initial state
+    else:
+        state = random.choice(list(markov_chain.keys()))
+    
+    result = list(state)
+    
+    # Generate text
+    for _ in range(length - len(state)):
+        if state in markov_chain and markov_chain[state]:
+            next_word = random.choice(markov_chain[state])
+            result.append(next_word)
+            state = tuple(result[-2:])  # Update state to last 2 words
+        else:
+            break
+    
+    return " ".join(result)
+
+# Build the Markov Chain (order=2 means looking at 2 previous words)
+order = 2
+markov_chain = build_markov_chain(training_text, order)
+
+# Generate and print some text
+print("Generated text (starting randomly):")
+for _ in range(3):  # Generate 3 samples
+    print(generate_text(markov_chain, length=10))
+
+print("\nGenerated text (starting with 'The sun'):")
+print(generate_text(markov_chain, length=10, start_words="The sun"))
